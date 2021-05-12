@@ -67,12 +67,13 @@ import { Component, Vue } from 'vue-property-decorator';
 import SessionJoin from '../Components/SessionJoin.vue';
 
 @Component({
-   mounted(){
+   created(){
        let user = this.$store.getters.currentUser
        if(user == null) this.$router.push('/');
        if(user.auth_level == 2 || user.auth_level == 3) this.$router.push('/admin/panel');
        if(user.auth_level == 4) this.$router.push('/admin/posts');
        this.$store.dispatch('getSessions');
+
    },
    components: {
        SessionJoin

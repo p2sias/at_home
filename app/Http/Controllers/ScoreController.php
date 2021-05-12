@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Validator;
 class ScoreController extends Controller
 {
     /**
+     * Retourne tous les scores
+     *
+     */
+    public function index(Request $request)
+    {
+        return response()->json(UserScores::all());
+    }
+    /**
      * Créer une entrée de score
      */
     public function create(Request $request)
@@ -41,6 +49,19 @@ class ScoreController extends Controller
             //Si elle vient du web
         } else {
             return back();
+        }
+    }
+    /**
+     * Affiche les scores d'une session selon son ID
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id, Request $request)
+    {
+        $user_score = UserScores::where('session_id', $id)->get();
+
+        if (isset($user_score)) {
+            return response()->json($user_score);
         }
     }
 }

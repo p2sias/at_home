@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{UserController, ChallengeController, FileController, PostController, SessionController, ScoreController, TutorialStepController, LoginController, ValidationController};
+use App\Http\Controllers\{UserController, ChallengeController, FilesController, PostController, SessionController, ScoreController, TutorialStepController, LoginController, ValidationController};
 use App\Models\ChallengeFile;
 
 /*
@@ -31,6 +31,8 @@ Route::middleware('auth:api')->get('/user/{id}', [UserController::class, 'show']
 Route::post('/user/create', [UserController::class, 'store'])->name('api.users.create');
 Route::middleware('auth:api')->post('/user/{id}/update', [UserController::class, 'update'])->name('api.user.update');
 Route::middleware('auth:api')->get('/user/{id}/delete', [UserController::class, 'destroy'])->name('api.user.delete');
+Route::middleware('auth:api')->post('/user/{id}/changeAuth/{auth_level}', [UserController::class, 'changeAuthLevel'])->name('api.user.authModify');
+
 
 Route::middleware('auth:api')->get('/sessions', [SessionController::class, 'index'])->name('api.sessions.list');
 Route::middleware('auth:api')->get('/session/{id}', [SessionController::class, 'show'])->name('api.session.show');
@@ -50,10 +52,10 @@ Route::middleware('auth:api')->get('/challenge/{id}/delete', [ChallengeControlle
 Route::middleware('auth:api')->post('/challenge/{id}/join', [UserController::class, 'joinChallenge'])->name('api.challenge.join');
 Route::middleware('auth:api')->post('/challenge/{id}/leave', [UserController::class, 'leaveChallenge'])->name('api.challenge.leave');
 
-Route::middleware('auth:api')->post('/challenge/{id}/file/create', [FileController::class, 'postFile'])->name('api.challenge.file');
-Route::middleware('auth:api')->get('/challenge/file/{user_id}', [FileController::class, 'getFilesByUser'])->name('api.challenge.file.get');
+Route::middleware('auth:api')->post('/challenge/{id}/file/create', [FilesController::class, 'postFile'])->name('api.challenge.file');
+Route::middleware('auth:api')->get('/challenge/file/{user_id}', [FilesController::class, 'getFilesByUser'])->name('api.challenge.file.get');
 
-Route::middleware('auth:api')->post('/challenge/file/{file_id}/delete', [FileController::class, 'deleteFile'])->name('api.challenge.file.delete');
+Route::middleware('auth:api')->post('/challenge/file/{file_id}/delete', [FilesController::class, 'deleteFile'])->name('api.challenge.file.delete');
 
 
 
@@ -65,7 +67,9 @@ Route::middleware('auth:api')->get('/post/{id}/delete', [PostController::class, 
 
 Route::get('/posts/latest', [PostController::class, 'getLatestPosts']);
 
-Route::middleware('auth:api')->post('/score/create', [ScoreController::class, 'create'])->name('api.score.create');
+Route::get('/scores', [ScoreController::class, 'index'])->name('api.score.list');
+Route::get('/score/{session_id}', [ScoreController::class, 'show'])->name('api.score.show');
+Route::post('/score/create', [ScoreController::class, 'create'])->name('api.score.create');
 
 Route::middleware('auth:api')->get('/tutorials', [TutorialStepController::class, 'index'])->name('api.tutorial.list');
 Route::middleware('auth:api')->get('/tutorial/{id}', [TutorialStepController::class, 'show'])->name('api.tutorial.show');

@@ -23,7 +23,43 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        return response()->json(User::all());
+        $users = User::all();
+        foreach ($users as $user) {
+            unset($user->api_token);
+        }
+        return response()->json($users);
+    }
+
+    public function changeAuthLevel(Request $request, $id, $auth_level)
+    {
+        $validator = Validator::make($request->all(), [
+            'security_id' => 'integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $inputs = $request->all();
+
+        $security_user = User::find($inputs['security_id']);
+        if ($security_user->auth_lvl == 5) {
+            $user = User::find($id);
+            $user->auth_level = $auth_level;
+            if (($auth_level == 2 || $auth_level == 3 || $auth_level == 5) && $user->session_id != NULL) {
+                $user->session_id = NULL;
+
+                foreach ($user->validations as $validation) {
+                    foreach ($validation->files as $file) {
+                        Storage::delete($file->link);
+                        $file->delete();
+                    }
+                    $validation->delete();
+                }
+            }
+            $user->save();
+            return response()->json(['message' => 'user succefully updated']);
+        } else return response(403);
     }
 
     /**

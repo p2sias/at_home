@@ -1,18 +1,16 @@
 <template>
   <v-app>
     <v-app-bar
-      max-height="100px"
+      max-height="120px"
       color="deep-purple"
       dark
     >
         <v-app-bar-nav-icon @click="drawer = true" class="hidden-md-and-up"></v-app-bar-nav-icon>
-        <v-toolbar-title @click="gohome()">
-            <v-img
-            max-height="100"
+         <v-img
+            style="margin-top:50px"
             max-width="250"
-            src="https://cdn.discordapp.com/attachments/641624479780306951/839994605654114333/Home_A_Game.png"
-            ></v-img>
-        </v-toolbar-title>
+            src="https://zupimages.net/up/21/18/inko.png"
+        ></v-img>
 
         <v-spacer></v-spacer>
 
@@ -44,6 +42,20 @@
             class="hidden-sm-and-down">
             <v-btn  class="font-weight-bold" to="/admin/posts" text v-if="canPost">Posts</v-btn>
             <v-btn  class="font-weight-bold" to="/admin/panel" text >Panel administrateur</v-btn>
+            <v-btn  class="font-weight-bold" @click="logout()" color="black" text >Logout</v-btn>
+
+        </v-toolbar-items>
+
+        <v-toolbar-items v-if="
+            routeName != 'home' &&
+            routeName != 'register' &&
+            routeName != 'demos' &&
+            routeName != 'login' &&
+            routeName != 'blog' &&
+            logged && simpleUser"
+            class="hidden-sm-and-down">
+            <v-btn  class="font-weight-bold" to="/dashboard" text>Tableau de bord</v-btn>
+            <v-btn  class="font-weight-bold" to="/sessions" text >Sessions</v-btn>
             <v-btn  class="font-weight-bold" @click="logout()" color="black" text >Logout</v-btn>
 
         </v-toolbar-items>

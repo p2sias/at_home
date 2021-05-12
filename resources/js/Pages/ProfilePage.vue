@@ -225,8 +225,6 @@ export default class ProfilePage extends Vue {
     private uniqueEmailCheckLoading = false;
     private uniquePhoneCheckLoading = false;
 
-
-
     private uniquePseudo = true;
     private uniqueEmail = true;
     private uniquePhone = true;

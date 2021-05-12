@@ -19,12 +19,15 @@ class CreateChallengesFilesTable extends Migration
             $table->string('type');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('challenge_id');
+            $table->unsignedBigInteger('validation_id');
             $table->timestamps();
             $table->string('user_fileName');
             $table->integer('width')->default(NULL);
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('challenge_id')->references('id')->on('challenges')->onDelete('cascade');
+            $table->foreign('challenge_id')->references('id')->on('challenges')->onDelete('cascade');
+            $table->foreign('validation_id')->references('id')->on('validations')->onDelete('cascade');
 
             $table->engine = 'InnoDB';
         });

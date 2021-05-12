@@ -2,6 +2,7 @@ import Vue from 'vue'
 import '@mdi/font/css/materialdesignicons.min.css'
 
 import Vuetify, {
+    VDataTable,
     VSlider,
     VContent,
     VProgressCircular,
@@ -71,6 +72,7 @@ import Vuetify, {
 
 Vue.use(Vuetify, {
     components: {
+        VDataTable,
         VToolbarItems,
         VFooter,
         VDatePicker,

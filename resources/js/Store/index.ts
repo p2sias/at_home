@@ -86,7 +86,8 @@ export default new Vuex.Store({
         'Authorization': 'Bearer ' + getters.apiToken
       }
       await axios.get('http://localhost:8000/api/challenges', { headers })
-        .then((response: any) => {
+          .then((response: any) => {
+              console.log(response);
           commit('SET_CHALLENGES', response.data);
         }).catch((err:any) => {console.log(JSON.stringify(err.message))})
     },
