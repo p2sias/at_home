@@ -43,7 +43,7 @@ class UserController extends Controller
         $inputs = $request->all();
 
         $security_user = User::find($inputs['security_id']);
-        if ($security_user->auth_lvl == 5) {
+        if ($security_user->auth_level == 5) {
             $user = User::find($id);
             $user->auth_level = $auth_level;
             if (($auth_level == 2 || $auth_level == 3 || $auth_level == 5) && $user->session_id != NULL) {
@@ -177,8 +177,13 @@ class UserController extends Controller
 
         $search_user = User::where($inputs['field'], $inputs['valueToCheck'])->first();
 
-        if (isset($search_user) && $search_user->id != $inputs['currentUserId']) return response()->json(['exist' => true]);
-        else return response()->json(['exist' => false]);
+        if (isset($inputs['create'])) {
+            if (isset($search_user)) return response()->json(['exist' => true]);
+            else return response()->json(['exist' => false]);
+        } else {
+            if (isset($search_user) && $search_user->id != $inputs['currentUserId']) return response()->json(['exist' => true]);
+            else return response()->json(['exist' => false]);
+        }
     }
 
     /**

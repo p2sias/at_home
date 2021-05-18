@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Log;
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -47,6 +49,16 @@ class PostController extends Controller
         $post->user_id = $inputs['user_id'];
         $post->save();
 
+        //logs
+        $admin = User::find($inputs['user_id']);
+
+        if (isset($admin)) {
+            $log = new Log();
+            $log->message = "Création du post : " . $post->title;
+            $log->user_id = $admin->id;
+            $log->save();
+        }
+
         return response()->json(
             [
                 'success' => 'post ' . $post->title . ' successfully created !'
@@ -82,6 +94,7 @@ class PostController extends Controller
             'title' => 'required|string|unique:challenges|max:255',
             'content' => 'required|string|max:2000',
             'short_desc' => 'required|string|max:255',
+            'user_id' => 'required|integer'
         ]);
 
         if ($validator->fails()) {
@@ -89,7 +102,21 @@ class PostController extends Controller
         } else {
             $post = Post::find($id);
             if (isset($post)) {
-                $post->fill($request->all());
+
+                //logs
+                $admin = User::find($request->input('user_id'));
+
+                if (isset($admin)) {
+                    $log = new Log();
+                    $log->message = "Modification du post : " . $request->input('title');
+                    $log->user_id = $admin->id;
+                    $log->save();
+                }
+
+                $inputs = $request->all();
+                unset($inputs['user_id']);
+
+                $post->fill($inputs);
                 $post->save();
 
                 return response()->json(["success" => "post edited succefully"]);
@@ -118,6 +145,18 @@ class PostController extends Controller
     {
         $post = Post::find($id);
         if (isset($post)) {
+
+            //logs
+            $admin = User::find($request->input('user_id'));
+
+            if (isset($admin)) {
+                $log = new Log();
+                $log->message = "Suppression du post : " . $post->title;
+                $log->user_id = $admin->id;
+                $log->save();
+            }
+
+
             $post->delete();
             return response()->json(["success" => "post with id " . $id . " deleted"]);
         } else {

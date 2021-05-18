@@ -1,8 +1,9 @@
 <template>
         <v-card>
             <v-card-title class="d-flex justify-space-between">
-                <h3>{{act}} un post</h3>
-                <div>
+                <h3 v-if="admin">{{act}} un post</h3>
+                <h3 v-else>{{post.title}}</h3>
+                <div v-if="admin">
                     <v-icon v-if="!modifyLoading" color="green" @click="saveChanges()">mdi-content-save</v-icon>
                     <v-icon v-if="!modifyLoading" color="red" @click="resetForm()">mdi-refresh</v-icon>
                     <v-icon v-if="!modifyLoading" color="red" @click="close()">mdi-close</v-icon>
@@ -24,6 +25,7 @@
                             label="Titre"
                             :rules="[v => !!v || 'Entrez un titre !']"
                             required
+                            v-if="admin"
                         ></v-text-field>
 
                         <v-text-field
@@ -31,6 +33,7 @@
                             label="Description"
                             :rules="[v => !!v || 'Entrez une description']"
                             required
+                            v-if="admin"
                         ></v-text-field>
 
                         <v-row>
@@ -40,10 +43,14 @@
                                     label="Texte en MarkDown"
                                     :rules="[v => !!v || 'Entrez un texte']"
                                     required
+                                    v-if="admin"
                                 ></v-textarea>
                             </v-col>
-                            <v-col md="6" cols="12">
+                            <v-col md="6" cols="12" v-if="admin">
                                 <h3>Rendu</h3>
+                               <vue-simple-markdown :source="formData.content"></vue-simple-markdown>
+                            </v-col>
+                            <v-col md="12" cols="12" v-else>
                                <vue-simple-markdown :source="formData.content"></vue-simple-markdown>
                             </v-col>
                         </v-row>
@@ -60,7 +67,9 @@ import axios from 'axios'
 @Component
 export default class PostEdit extends Vue {
     @Prop() readonly post?: any
+    @Prop() readonly admin?: boolean
     @Prop() readonly action: string
+
 
     private modifyLoading = false;
 
@@ -157,6 +166,7 @@ export default class PostEdit extends Vue {
         } else {
             this.modifyLoading = true;
             let token = this.$store.getters.currentUser.api_token;
+            this.formData.user_id = this.$store.getters.currentUser.id;
             await axios.post('http://127.0.0.1:8000/api/post/'+this.post.id+'/update', this.formData, {headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+ token

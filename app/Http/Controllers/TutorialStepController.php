@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Log;
 use App\Models\TutorialStep;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +18,28 @@ class TutorialStepController extends Controller
      */
     public function index()
     {
-        return response()->json(TutorialStep::all());
+        return response()->json(TutorialStep::orderBy('order', 'ASC')->get());
+    }
+
+    public function changeVisibility(Request $request, $id)
+    {
+        $tutorial = TutorialStep::find($id);
+
+        if (isset($tutorial)) {
+            $tutorial->status = $request->input('action');
+            $tutorial->save();
+
+            $admin = User::find($request->input('user_id'));
+
+            if (isset($admin)) {
+                $log = new Log();
+                $log->message = "Visibilité du tutoriel : " . $tutorial->name . " changé en : " . $tutorial->status;
+                $log->user_id = $admin->id;
+                $log->save();
+            }
+
+            return response()->json(['message' => 'tutorial with id ' . $id . ' visibility updated']);
+        }
     }
 
 
@@ -67,6 +90,15 @@ class TutorialStepController extends Controller
         $tutorial->order = $inputs['order'];
         $tutorial->save();
 
+        $admin = User::find($inputs['user_id']);
+
+        if (isset($admin)) {
+            $log = new Log();
+            $log->message = "Création du tutoriel : " . $tutorial->name;
+            $log->user_id = $admin->id;
+            $log->save();
+        }
+
 
         return response()->json(
             [
@@ -114,7 +146,20 @@ class TutorialStepController extends Controller
     {
         $tutorial = TutorialStep::find($id);
         if (isset($tutorial)) {
+
+
+            //logs
+            $admin = User::find($request->input('user_id'));
+
+            if (isset($admin)) {
+                $log = new Log();
+                $log->message = "Suppression du tutorial : " . $tutorial->name;
+                $log->user_id = $admin->id;
+                $log->save();
+            }
+
             $tutorial->delete();
+
             return response()->json(["success" => "tutorial with id " . $id . " deleted"]);
         }
         return response()->json(["error" => "tutorial with id " . $id . " not found"]);

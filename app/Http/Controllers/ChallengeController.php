@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Challenge;
 use App\Models\ChallengeFile;
+use App\Models\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\URL;
@@ -56,6 +57,18 @@ class ChallengeController extends Controller
         $challenge->user_id = $inputs['user_id'];
         $challenge->save();
 
+        //logs
+        $admin = User::find($inputs['user_id']);
+
+        if (isset($admin)) {
+            $log = new Log();
+            $log->message = "Création du challenge : " . $challenge->title;
+            $log->user_id = $admin->id;
+            $log->save();
+        }
+
+
+
         return response()->json(
             [
                 'success' => 'challenge ' . $challenge->title . ' successfully created !'
@@ -94,6 +107,7 @@ class ChallengeController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
             'points' => 'required|integer',
+            'user_id' => 'required|integer'
         ]);
 
         if ($validator->fails()) {
@@ -101,8 +115,24 @@ class ChallengeController extends Controller
         } else {
             $challenge = Challenge::where('id', $id)->first();
             if (isset($challenge)) {
-                $challenge->fill($request->all());
+
+                //logs
+                $admin = User::find($request->input('user_id'));
+
+                if (isset($admin)) {
+                    $log = new Log();
+                    $log->message = "Modification du challenge : " . $request->input('title');
+                    $log->user_id = $admin->id;
+                    $log->save();
+                }
+
+                $inputs = $request->all();
+                unset($inputs['user_id']);
+
+                $challenge->fill($inputs);
                 $challenge->save();
+
+
 
                 return response()->json(["success" => "challenge edited succefully"]);
             }
@@ -121,6 +151,17 @@ class ChallengeController extends Controller
     {
         $challenge = Challenge::find($id);
         if (isset($challenge)) {
+
+            //logs
+            $admin = User::find($request->input('user_id'));
+
+            if (isset($admin)) {
+                $log = new Log();
+                $log->message = "Suppression du challenge : " . $challenge->title;
+                $log->user_id = $admin->id;
+                $log->save();
+            }
+
             $challenge->delete();
             return response()->json(["success" => "challenge with id " . $id . " deleted"]);
         }

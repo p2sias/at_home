@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\SessionResource;
 use App\Http\Resources\ValidationResource;
+use App\Models\Log;
 use Illuminate\Http\Request;
 use App\Models\Session;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class SessionController extends Controller
@@ -55,17 +57,22 @@ class SessionController extends Controller
         $session->user_id = $inputs['user_id'];
         $session->save();
 
-        //Si la requete vient de l'API
-        if ($request->wantsJson()) {
-            return response()->json(
-                [
-                    'success' => 'session with title ' . $session->title . ' successfully created !'
-                ]
-            );
-            //Si elle vient du web
-        } else {
-            return back();
+        //logs
+        $admin = User::find($inputs['user_id']);
+
+        if (isset($admin)) {
+            $log = new Log();
+            $log->message = "Création de la session : " . $session->title;
+            $log->user_id = $admin->id;
+            $log->save();
         }
+
+
+        return response()->json(
+            [
+                'success' => 'session with title ' . $session->title . ' successfully created !'
+            ]
+        );
     }
 
     public function getValidations($id)
@@ -102,16 +109,6 @@ class SessionController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -140,7 +137,21 @@ class SessionController extends Controller
         } else {
             $session = Session::where('id', $id)->first();
             if (isset($session)) {
-                $session->fill($request->all());
+
+                //logs
+                $admin = User::find($request->input('user_id'));
+
+                if (isset($admin)) {
+                    $log = new Log();
+                    $log->message = "Modification du post : " . $request->input('title');
+                    $log->user_id = $admin->id;
+                    $log->save();
+                }
+
+                $inputs = $request->all();
+                unset($inputs['user_id']);
+
+                $session->fill($inputs);
                 $session->save();
 
                 if ($request->wantsJson()) return response()->json(["success" => "session edited succefully"]);
@@ -162,12 +173,20 @@ class SessionController extends Controller
     {
         $session = Session::find($id);
         if (isset($session)) {
+
+            $admin = User::find($request->input('user_id'));
+
+            if (isset($admin)) {
+                $log = new Log();
+                $log->message = "Suppression de la session : " . $session->title;
+                $log->user_id = $admin->id;
+                $log->save();
+            }
+
             $session->delete();
-            if ($request->wantsJson()) return response()->json(["success" => "session with id " . $id . " deleted"]);
-            else return back();
+            return response()->json(["success" => "session with id " . $id . " deleted"]);
         } else {
             if ($request->wantsJson()) return response()->json(["error" => "session with id " . $id . " not found"]);
-            else return back();
         }
     }
 }

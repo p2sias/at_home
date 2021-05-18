@@ -1,8 +1,5 @@
 <template>
     <v-container>
-        <v-row>
-            <h1>Profil de {{user.pseudo}}</h1>
-        </v-row>
 
         <v-row>
             <v-col sm="6" cols="12">

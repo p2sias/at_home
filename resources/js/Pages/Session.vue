@@ -1,6 +1,6 @@
 <template>
     <v-content>
-        <v-row xs-6 class="justify-center">
+        <v-row style="margin-top:100px" class="justify-center">
             <v-col v-if="!haveSession" sm="6" cols="12">
                 <v-card class="d-flex justify-space-between" v-for="session in sessions" :key="session.id">
                         <div>
@@ -70,9 +70,9 @@ import SessionJoin from '../Components/SessionJoin.vue';
    created(){
        let user = this.$store.getters.currentUser
        if(user == null) this.$router.push('/');
-       if(user.auth_level == 2 || user.auth_level == 3) this.$router.push('/admin/panel');
-       if(user.auth_level == 4) this.$router.push('/admin/posts');
-       this.$store.dispatch('getSessions');
+       else if(user.auth_level == 2 || user.auth_level == 3 || user.auth_level == 5) this.$router.push('/admin/panel');
+       else if(user.auth_level == 4) this.$router.push('/admin/posts');
+       else this.$store.dispatch('getSessions');
 
    },
    components: {

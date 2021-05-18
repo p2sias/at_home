@@ -6,7 +6,14 @@ import AdminPanel from '../Pages/admin/AdminPanel.vue'
 import PostsPanel from '../Pages/admin/PostsPanel.vue'
 import SessionDetails from '../Pages/admin/sessions/SessionDetails.vue'
 import ProfilePage from '../Pages/ProfilePage.vue'
-import Users from '../Pages/admin/Users.vue';
+import Users from '../Pages/admin/Users.vue'
+import Register from '../Pages/site/Register.vue'
+import Logs from '../Pages/admin/Logs.vue'
+import Demos from '../Pages/site/Demos.vue'
+import DemosPanel from '../Pages/admin/DemosPanel.vue'
+import Ranking from '../Pages/site/Ranking.vue'
+import Blog from '../Pages/site/Blog.vue'
+
 
 import Home from '../Pages/site/Home.vue'
 
@@ -52,11 +59,41 @@ const routes: Array<RouteConfig> = [
         name: 'Users',
         component: Users
     },
+    {
+        path: '/admin/logs',
+        name: 'Logs',
+        component: Logs
+    },
+    {
+        path: '/admin/demos',
+        name: 'admin_demos',
+        component: DemosPanel
+    },
     // Site vitrine
     {
         path: '/',
         name: 'home',
         component: Home
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: Register
+    },
+    {
+        path: '/demos',
+        component: Demos,
+        name: "demos",
+    },
+    {
+        path: '/ranking',
+        component: Ranking,
+        name: 'ranking'
+    },
+    {
+        path: '/blog',
+        name: 'blog',
+        component: Blog
     }
 ]
 

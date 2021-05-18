@@ -1,22 +1,20 @@
 <template>
     <v-main>
-        <v-card v-if="isAdmin">
+        <v-card>
             <v-card-title>{{post.title}}</v-card-title>
             <v-card-actions>
-                <v-btn v-if="!loading" @click="deletePost(post.id)">Supprimer</v-btn>
-                <v-btn v-if="!loading" @click="editDialog=true">Modifier</v-btn>
+                <v-btn v-if="!loading && isAdmin" @click="deletePost(post.id)">Supprimer</v-btn>
+                <v-btn v-if="!loading && isAdmin" @click="editDialog=true">Modifier</v-btn>
+                <v-btn v-if="!isAdmin" @click="editDialog=true">Voir</v-btn>
                 <v-progress-circular v-if="loading"
                             indeterminate
                             color="primary"
                 ></v-progress-circular>
             </v-card-actions>
         </v-card>
-        <v-card v-else>
-
-        </v-card>
 
         <v-dialog v-model="editDialog">
-            <PostEdit @taskEnded="taskEnded" action="modify" :post="post"/>
+            <PostEdit @taskEnded="taskEnded" action="modify" :post="post" :admin="isAdmin"/>
         </v-dialog>
     </v-main>
 </template>
@@ -37,9 +35,13 @@ export default class PostCard extends Vue {
     private loading = false;
 
     private get isAdmin(): boolean
-    {   const user_lvl: any = this.$store.getters.currentUser.auth_level;
-        if(user_lvl != 3 && user_lvl != 4) return false;
-        return true;
+    {
+        if(this.$store.getters.currentUser) {
+            const user_lvl: any = this.$store.getters.currentUser.auth_level;
+            if(user_lvl != 3 && user_lvl != 4 && user_lvl != 5) return false;
+            return true;
+        }
+        return false;
     }
 
     private taskEnded(): void
@@ -52,7 +54,7 @@ export default class PostCard extends Vue {
     {
         this.loading = true;
         const token = this.$store.getters.currentUser.api_token;
-        await axios.get('http://127.0.0.1:8000/api/post/'+post_id+'/delete', {headers:
+        await axios.post('http://127.0.0.1:8000/api/post/'+post_id+'/delete', {user_id: this.$store.getters.currentUser.id}, {headers:
         {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token

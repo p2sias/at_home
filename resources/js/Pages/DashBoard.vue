@@ -50,13 +50,17 @@ import axios from 'axios';
    mounted(){
        let user = this.$store.getters.currentUser
        if(user == null) this.$router.push('/');
-       if(user.auth_level == 2 || user.auth_level == 3) this.$router.push('/admin/panel');
-       if(user.auth_level == 4) this.$router.push('/admin/posts');
-       //A chaque montage du dashboard on refresh l'utilisateur (pour les challenges) et les validations
-       this.$store.dispatch('refreshCurrentUser');
-       this.$store.dispatch('getValidations');
-       this.$store.dispatch('getValidatingChallenges');
-       this.$store.dispatch('getFilesByUser', user.id);
+       else if(user.auth_level == 2 || user.auth_level == 3 || user.auth_level == 5) this.$router.push('/admin/panel');
+       else if(user.auth_level == 4) this.$router.push('/admin/posts');
+       else {
+            //A chaque montage du dashboard on refresh l'utilisateur (pour les challenges) et les validations
+        this.$store.dispatch('refreshCurrentUser');
+        this.$store.dispatch('getValidations');
+        this.$store.dispatch('getValidatingChallenges');
+        this.$store.dispatch('getFilesByUser', user.id);
+       }
+
+
 
    }
 })

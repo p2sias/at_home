@@ -2,12 +2,15 @@
     <v-container>
         <v-row>
             <v-col class="d-flex flex-column">
-                <v-text-field
-                    v-model="search"
-                    label="Rechercher (pseudo, email)"
-                    class="mx-4"
-                ></v-text-field>
-                <v-icon @click="createDialog = true">mdi-plus</v-icon>
+                <div class="d-flex justify-space-between">
+                    <v-text-field
+                        v-model="search"
+                        label="Rechercher (pseudo, email)"
+                        class="mx-4"
+                    ></v-text-field>
+                    <v-icon @click="createDialog = true">mdi-plus</v-icon>
+                </div>
+
                 <v-data-table :headers="headers" :search="search" :items="users" dense class="elevation-1">
                     <template v-slot:item="row">
                         <tr>
@@ -15,7 +18,7 @@
                             <td>{{ row.item.surname }}</td>
                             <td>{{ row.item.pseudo }}</td>
                             <td>{{ row.item.email }}</td>
-                            <td>
+                            <td v-if="row.item.pseudo != user.pseudo">
                                 <v-select
                                     v-model="row.item.auth_level"
                                     :items="authorizationsLvl"
@@ -23,6 +26,18 @@
                                     item-value="auth_lvl"
                                     label="select"
                                     solo
+                                    @change="changeRole(row.item.id, row.item.auth_level, row.item.pseudo)"
+                                ></v-select>
+                            </td>
+                            <td v-else>
+                               <v-select
+                                    v-model="row.item.auth_level"
+                                    :items="authorizationsLvl"
+                                    item-text="role"
+                                    item-value="auth_lvl"
+                                    label="select"
+                                    solo
+                                    disabled
                                     @change="changeRole(row.item.id, row.item.auth_level, row.item.pseudo)"
                                 ></v-select>
                             </td>
@@ -34,7 +49,6 @@
         <v-snackbar
         v-model="snackbar"
         timeout="3000"
-        :multi-line="multiLine"
         >
         {{ text }}
 
@@ -52,8 +66,9 @@
 
         <v-dialog
             v-model="createDialog"
+            max-width="600px"
         >
-            <UserDisplay @created="createDialog = false" />
+            <UserDisplay @created="userCreated()" />
         </v-dialog>
     </v-container>
 </template>
@@ -104,7 +119,9 @@ export default class Users extends Vue {
     ];
 
     private async created() {
-        await getUsers().then((response: any) => {
+        if(this.$store.getters.currentUser.auth_level != 5) this.$router.push('/')
+        else {
+            await getUsers().then((response: any) => {
             console.log(response);
             response.forEach((user: any) => {
                 this.usersTab.push({
@@ -118,6 +135,17 @@ export default class Users extends Vue {
 
             });
         });
+        }
+    }
+
+    private get user(): void {
+        return this.$store.getters.currentUser;
+    }
+
+    private async userCreated(): Promise<void>
+    {
+        this.createDialog = false;
+        this.usersTab = await getUsers();
     }
 
     private get users(): any {

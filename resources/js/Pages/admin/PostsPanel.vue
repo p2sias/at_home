@@ -26,12 +26,11 @@ import axios from 'axios';
 import PostCard from '../../Components/blog/PostCard.vue'
 import PostEdit from '../../Components/blog/PostEdit.vue'
 
-    async function getPosts(api_token: string): Promise<any>
+    async function getPosts(): Promise<any>
     {
         let posts;
         await axios.get('http://127.0.0.1:8000/api/posts', {headers:{
-            "Content-Type": "application/json",
-            "Authorization": "Bearer "+api_token
+            "Content-Type": "application/json"
         }}).then((response: any) => {
             posts = response.data;
         });
@@ -48,8 +47,8 @@ import PostEdit from '../../Components/blog/PostEdit.vue'
     {
         let user = this.$store.getters.currentUser
         if(user == null) this.$router.push('/');
-        if(user.auth_level == 1) this.$router.push('/dashboard');
-        if(user.auth_level == 2) this.$router.push('/admin/panel');
+        else if(user.auth_level == 1) this.$router.push('/dashboard');
+        else if(user.auth_level == 2) this.$router.push('/admin/panel');
 
 
     }
@@ -62,7 +61,7 @@ export default class PostsPanel extends Vue {
 
     private async created()
     {
-        this.postsList = await getPosts(this.user.api_token);
+        this.postsList = await getPosts();
     }
 
     private get posts(): any
@@ -72,7 +71,7 @@ export default class PostsPanel extends Vue {
 
     private async refreshPosts(): Promise<void>
     {
-        this.postsList = await getPosts(this.user.api_token);
+        this.postsList = await getPosts();
     }
 
     private taskEnded(): void

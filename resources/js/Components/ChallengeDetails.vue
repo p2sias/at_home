@@ -236,7 +236,8 @@ export default class DashBoard extends Vue {
     private initialField: any = {
         description: this.challenge.description,
         points: this.challenge.points,
-        title: this.challenge.title
+        title: this.challenge.title,
+        user_id: this.$store.getters.currentUser.id
     }
 
 
@@ -293,7 +294,7 @@ export default class DashBoard extends Vue {
     private async deleteChallenge()
     {
         this.modifyLoading = true;
-        await axios.get('http://localhost:8000/api/challenge/'+this.challenge.id+'/delete', {
+        await axios.post('http://localhost:8000/api/challenge/'+this.challenge.id+'/delete',{user_id: this.user.id}, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+this.api_token,
@@ -391,7 +392,8 @@ export default class DashBoard extends Vue {
         this.initialField = {
             description: this.challenge.description,
             points: this.challenge.points,
-            title: this.challenge.title
+            title: this.challenge.title,
+            user_id: this.$store.getters.currentUser.id
         }
     }
 

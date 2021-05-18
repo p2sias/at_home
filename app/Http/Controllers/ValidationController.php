@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Session;
 use App\Models\Challenge;
 use App\Models\ChallengeFile;
+use App\Models\Log;
+use App\Models\User;
 use App\Models\UserScores;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Validation;
@@ -38,6 +40,7 @@ class ValidationController extends Controller
         $validator = Validator::make($request->all(), [
             'choice' => 'required|string',
             'comment' => 'string',
+            'user_id' => 'required|integer'
         ]);
 
         $inputs = $request->all();
@@ -76,6 +79,16 @@ class ValidationController extends Controller
                 $validation->status = $inputs['choice'];
                 if (isset($inputs['comment'])) $validation->comment = $inputs['comment'];
                 $validation->save();
+
+                //logs
+                $admin = User::find($inputs['user_id']);
+
+                if (isset($admin)) {
+                    $log = new Log();
+                    $log->message = "Validation du challenge " . $validation->challenge->title . " de " . $validation->user->pseudo . " traitée : " . $inputs['choice'];
+                    $log->user_id = $admin->id;
+                    $log->save();
+                }
 
                 return response()->json([
                     'res' => [
@@ -116,7 +129,6 @@ class ValidationController extends Controller
             $files[$i]->validation_id = $validation->id;
             $files[$i]->save();
         }
-
 
         return response()->json(
             [
@@ -193,45 +205,6 @@ class ValidationController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'comment' => 'required|string|max:500',
-            'status' => 'required|string|in:prog,valid,reject',
-            'user_id' => 'required|integer|exists:users,id',
-            'challenge_id' => 'required|integer|exists:challenges,id',
-        ]);
-
-        if ($validator->fails()) {
-            if ($request->wantsJson()) {
-                return response()->json($validator->errors());
-            } else {
-                return back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-        } else {
-            $validation = Validation::where('id', $id)->first();
-            if (isset($validation)) {
-                $validation->fill($request->all());
-                $validation->save();
-
-                if ($request->wantsJson()) return response()->json(["success" => "validation edited succefully"]);
-                else return back();
-            } else {
-                if ($request->wantsJson()) return response()->json(["error" => "validation with id " . $id . " not found"]);
-                else return back();
-            }
-        }
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
@@ -242,11 +215,9 @@ class ValidationController extends Controller
         $validation = Validation::find($id);
         if (isset($validation)) {
             $validation->delete();
-            if ($request->wantsJson()) return response()->json(["success" => "validation with id " . $id . " deleted"]);
-            else return back();
+            return response()->json(["success" => "validation with id " . $id . " deleted"]);
         } else {
-            if ($request->wantsJson()) return response()->json(["error" => "validation with id " . $id . " not found"]);
-            else return back();
+            return response()->json(["error" => "validation with id " . $id . " not found"]);
         }
     }
 }

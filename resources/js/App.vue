@@ -7,9 +7,10 @@
     >
         <v-app-bar-nav-icon @click="drawer = true" class="hidden-md-and-up"></v-app-bar-nav-icon>
          <v-img
-            style="margin-top:50px"
+            style="margin-top:50px; cursor:pointer"
             max-width="250"
             src="https://zupimages.net/up/21/18/inko.png"
+            @click="gohome"
         ></v-img>
 
         <v-spacer></v-spacer>
@@ -19,16 +20,16 @@
             routeName == 'register' ||
             routeName == 'demos' ||
             routeName == 'login' ||
-            routeName == 'blog'"
+            routeName == 'blog' ||
+            routeName == 'ranking'"
             class="hidden-sm-and-down">
-            <v-btn
-                class="font-weight-bold"
-                v-for="button in menu"
-                :key="button.key"
-                :color="button.color"
-                :to="button.link"
-                text
-            >{{button.title}}</v-btn>
+            <v-btn  class="font-weight-bold" to="/login" color="white" text v-if="!logged">Se connecter</v-btn>
+            <v-btn  class="font-weight-bold" to="/register" text v-if="!logged">S'inscrire</v-btn>
+            <v-btn  class="font-weight-bold" to="/dashboard" text v-if="logged">Espace membre</v-btn>
+            <v-btn  class="font-weight-bold" to="/blog" text>Actus</v-btn>
+            <v-btn  class="font-weight-bold" to="/demos"  text>Démonstrations</v-btn>
+            <v-btn  class="font-weight-bold" to="/ranking"  text>Classement</v-btn>
+            <v-btn  class="font-weight-bold" v-if="logged" @click="logout()" color="black" text >Logout</v-btn>
 
         </v-toolbar-items>
 
@@ -38,10 +39,15 @@
             routeName != 'demos' &&
             routeName != 'login' &&
             routeName != 'blog' &&
+            routeName != 'ranking' &&
             logged && !simpleUser"
             class="hidden-sm-and-down">
-            <v-btn  class="font-weight-bold" to="/admin/posts" text v-if="canPost">Posts</v-btn>
-            <v-btn  class="font-weight-bold" to="/admin/panel" text >Panel administrateur</v-btn>
+            <v-btn  class="font-weight-bold" to="/admin/users" text v-if="isSuperAdmin">Utilisateurs</v-btn>
+            <v-btn  class="font-weight-bold" to="/admin/demos" text v-if="isAdmin">Panel Tutoriels</v-btn>
+            <v-btn  class="font-weight-bold" to="/admin/logs" text v-if="isSuperAdmin">Logs</v-btn>
+            <v-btn  class="font-weight-bold" to="/admin/posts" text v-if="canPost || isSuperAdmin">Posts</v-btn>
+            <v-btn  class="font-weight-bold" to="/admin/panel" text v-if="isAdmin">Panel administrateur</v-btn>
+            <v-btn  class="font-weight-bold" to="/profile" text >Profil</v-btn>
             <v-btn  class="font-weight-bold" @click="logout()" color="black" text >Logout</v-btn>
 
         </v-toolbar-items>
@@ -52,10 +58,12 @@
             routeName != 'demos' &&
             routeName != 'login' &&
             routeName != 'blog' &&
+            routeName != 'ranking' &&
             logged && simpleUser"
             class="hidden-sm-and-down">
             <v-btn  class="font-weight-bold" to="/dashboard" text>Tableau de bord</v-btn>
             <v-btn  class="font-weight-bold" to="/sessions" text >Sessions</v-btn>
+            <v-btn  class="font-weight-bold" to="/profile" text >Profil</v-btn>
             <v-btn  class="font-weight-bold" @click="logout()" color="black" text >Logout</v-btn>
 
         </v-toolbar-items>
@@ -100,22 +108,36 @@
                 <v-list-item-title>Sessions</v-list-item-title>
             </v-list-item>
 
-            <v-list-item v-if="!simpleUser" to="/users" @click="drawer = false">
+            <v-list-item v-if="isSuperAdmin" to="/admin/users" @click="drawer = false">
                 <v-list-item-icon>
                 <v-icon>mdi-account-group</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Utilisateurs</v-list-item-title>
             </v-list-item>
 
+            <v-list-item v-if="isSuperAdmin" to="/admin/demos" @click="drawer = false">
+                <v-list-item-icon>
+                <v-icon>mdi-account-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Panel Tutoriels</v-list-item-title>
+            </v-list-item>
 
-            <v-list-item to="/admin/posts" @click="drawer = false" v-if="canPost && !simpleUser">
+            <v-list-item v-if="isSuperAdmin" to="/admin/logs" @click="drawer = false">
+                <v-list-item-icon>
+                <v-icon>mdi-account-group</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Logs</v-list-item-title>
+            </v-list-item>
+
+
+            <v-list-item to="/admin/posts" @click="drawer = false" v-if="canPost || isSuperAdmin">
                 <v-list-item-icon>
                 <v-icon>mdi-post</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Posts</v-list-item-title>
             </v-list-item>
 
-            <v-list-item v-if="!simpleUser" to="/admin/panel" @click="drawer = false">
+            <v-list-item v-if="!simpleUser && isAdmin" to="/admin/panel" @click="drawer = false">
                 <v-list-item-icon>
                 <v-icon>mdi-shield-account</v-icon>
                 </v-list-item-icon>
@@ -152,7 +174,7 @@
             <v-list-item-title>Actualités</v-list-item-title>
           </v-list-item>
 
-          <v-list-item to="/demo" @click="drawer = false">
+          <v-list-item to="/demos" @click="drawer = false">
             <v-list-item-icon>
               <v-icon>mdi-school</v-icon>
             </v-list-item-icon>
@@ -209,8 +231,18 @@ export default class App extends Vue {
     return false;
   }
 
+  private get isSuperAdmin(): boolean {
+      if(this.currentUser.auth_level == 5) return true;
+      return false;
+  }
+
   private gohome(): void {
       this.$router.push({name: 'home'});
+  }
+
+  private get isAdmin(): boolean {
+    if(this.$store.getters.currentUser.auth_level == 2 || this.$store.getters.currentUser.auth_level == 3 || this.$store.getters.currentUser.auth_level == 5) return true;
+    return false;
   }
 
   private get simpleUser(): boolean {

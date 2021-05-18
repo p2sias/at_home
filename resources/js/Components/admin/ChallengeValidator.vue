@@ -13,7 +13,7 @@
         max-width="1000px"
         >
             <v-card
-                
+
             >
                  <v-card-title>
                     <h2>Demande de validation</h2>
@@ -47,7 +47,7 @@
                                 <v-card-actions><v-icon @click="seeImage(file)">mdi-arrow-right-drop-circle</v-icon></v-card-actions>
                             </v-card>
                         </v-col>
-                        
+
                     </v-col>
 
                     <v-col sm="6" cols="10">
@@ -109,7 +109,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-    </v-container> 
+    </v-container>
 </template>
 
 <script lang="ts">
@@ -125,7 +125,8 @@ export default class ChallengeValidator extends Vue {
 
     private form = {
         comment: '',
-        choice: ''
+        choice: '',
+        user_id: this.$store.getters.currentUser.id
     }
 
     private validationDialog = false;
@@ -168,8 +169,9 @@ export default class ChallengeValidator extends Vue {
             this.errorMessage = 'Merci d\'accepter ou refuser cette validation';
             this.errorDialog = true;
         } else {
+
             await axios.post('http://127.0.0.1:8000/api/validation/'+this.validation.id+'/validate', this.form, {
-                headers: 
+                headers:
                 {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer '+this.api_token,
@@ -184,7 +186,7 @@ export default class ChallengeValidator extends Vue {
                 this.validationDialog = false;
             });
         }
-        this.validateLoading = false; 
+        this.validateLoading = false;
     }
 
 

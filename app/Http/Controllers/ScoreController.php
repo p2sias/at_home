@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ScoreResource;
 use App\Models\UserScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +15,19 @@ class ScoreController extends Controller
      */
     public function index(Request $request)
     {
-        return response()->json(UserScores::all());
+        $sorted = [];
+        $scores = UserScores::orderBy('score', 'DESC')->get();
+
+        foreach ($scores as $score) {
+            $session = $score->session;
+            $startTimestamp = strtotime($session->start_date);
+            $endTimestamp = strtotime($session->end_date);
+            $nowTimestamp = strtotime(now());
+
+            if ($startTimestamp <= $nowTimestamp && $endTimestamp >= $nowTimestamp) array_push($sorted, $score);
+        }
+
+        return response()->json(ScoreResource::collection($sorted));
     }
     /**
      * Créer une entrée de score

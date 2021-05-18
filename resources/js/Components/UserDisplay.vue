@@ -170,6 +170,10 @@ import axios from 'axios';
 @Component
 export default class UserDisplay extends Vue {
 
+    created(){
+        console.log('userdisplay')
+    }
+
     private uniquePseudoCheckLoading = false;
     private uniqueEmailCheckLoading = false;
     private uniquePhoneCheckLoading = false;
@@ -233,11 +237,17 @@ export default class UserDisplay extends Vue {
 
         }
 
+        let userId: number;
+
+        if(this.user)
+        {
+            userId = this.user.id;
+        } else userId = 0;
+
         //Envoi d'une requete de login sur l'API
-        const authRes: any = await axios.post('http://localhost:8000/api/user/checkUnique', {field: type, valueToCheck: check, currentUserId: this.user.id}, {
+        const authRes: any = await axios.post('http://localhost:8000/api/user/checkUnique', {field: type, valueToCheck: check, currentUserId: userId, create: true}, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+this.user.api_token
             }
         })
         .then((response: any) => {
@@ -282,7 +292,7 @@ export default class UserDisplay extends Vue {
             if (!this.isUserFormValid) return
 
             //Envoi d'une requete de login sur l'API
-            const authRes: any = await axios.post('http://localhost:8000/api/user/store', this.formData, {
+            const authRes: any = await axios.post('http://localhost:8000/api/user/create', this.formData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
