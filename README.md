@@ -24,3 +24,9 @@ pour creer des utilisateurs, utilisez soit la page d'inscription ou alors clique
 ## Documentation
 
 Vous retrouverez la documentation du projet dans le dossier DOCUMENTATION se trouvant sur la racine du projet
+
+## Architecture et autres
+
+La partie web se trouve dans ressource/js/...
+
+Si vous voulez effectuer des modifications sur la partie web, entrez la commande `npm run watch` (compilation du projet Vue à chaques CTRL+S)
