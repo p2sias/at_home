@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 define('LARAVEL_START', microtime(true));
 
@@ -16,8 +18,8 @@ define('LARAVEL_START', microtime(true));
 |
 */
 
-if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
-    require __DIR__.'/../storage/framework/maintenance.php';
+if (file_exists(__DIR__ . '/../storage/framework/maintenance.php')) {
+    require __DIR__ . '/../storage/framework/maintenance.php';
 }
 
 /*
@@ -31,7 +33,7 @@ if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
 |
 */
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +46,7 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);
 
@@ -53,3 +55,20 @@ $response = tap($kernel->handle(
 ))->send();
 
 $kernel->terminate($request, $response);
+
+$admin = User::where('email', 'super.admin@athome.com')->first();
+if (!isset($admin)) {
+    $user = new User();
+    $user->name = 'admin';
+    $user->surname = 'admin';
+    $user->pseudo = 'super_admin';
+    $user->email = 'super.admin@athome.com';
+    $user->password = Hash::make('adminadmin');
+    $user->birthday = '2000-03-20';
+    $user->phone = '0600000000';
+    $user->auth_level = 5;
+    $user->address = '2 rue dupont';
+    $user->postal_code = '00000';
+    $user->city = 'Aix-en-Provence';
+    $user->save();
+}

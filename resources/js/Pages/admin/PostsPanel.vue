@@ -14,7 +14,7 @@
             </v-col>
         </v-card>
         <v-dialog v-model="editDialog">
-            <PostEdit @taskEnded="taskEnded" action="create"/>
+            <PostEdit @taskEnded="taskEnded" :admin="true" action="create"/>
         </v-dialog>
     </v-container>
 </template>

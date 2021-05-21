@@ -1,7 +1,7 @@
 <template>
         <v-card>
             <v-card-title class="d-flex justify-space-between">
-                <h3 v-if="admin">{{act}} un post</h3>
+                <h3 v-if="admin == true">{{act}} un post</h3>
                 <h3 v-else>{{post.title}}</h3>
                 <div v-if="admin">
                     <v-icon v-if="!modifyLoading" color="green" @click="saveChanges()">mdi-content-save</v-icon>
@@ -81,7 +81,7 @@ export default class PostEdit extends Vue {
 
     private created()
     {
-        if(this.post != undefined)
+        if(this.admin == false)
         {
             this.formData = {
                 title: this.post.title,
